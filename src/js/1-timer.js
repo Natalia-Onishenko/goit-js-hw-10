@@ -1,12 +1,11 @@
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
-
 import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
 
 const refs = {
   input: document.querySelector("#datetime-picker"),
-  startBtn: document.querySelector("#start-btn"),
+  startBtn: document.querySelector("[data-start]"),
   days: document.querySelector("[data-days]"),
   hours: document.querySelector("[data-hours]"),
   minutes: document.querySelector("[data-minutes]"),
@@ -16,9 +15,11 @@ const refs = {
 let userSelectedDate = null;
 let timerId = null;
 
+// спочатку кнопка неактивна
 refs.startBtn.disabled = true;
 
-const options = {
+// ініціалізація flatpickr
+flatpickr(refs.input, {
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
@@ -35,24 +36,24 @@ const options = {
       return;
     }
     userSelectedDate = pickedDate;
-    refs.startBtn.disabled = false;
+    refs.startBtn.disabled = false; // кнопка активна після вибору валідної дати
   },
-};
-
-flatpickr(refs.input, options);
+});
 
 refs.startBtn.addEventListener("click", () => {
-  refs.startBtn.disabled = true;
-  refs.input.disabled = true;
+  refs.startBtn.disabled = true; // кнопка блокується під час таймера
+  refs.input.disabled = true;    // інпут блокується під час таймера
 
   timerId = setInterval(() => {
     const diff = userSelectedDate - new Date();
+
     if (diff <= 0) {
       clearInterval(timerId);
       updateTimerFace({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-      refs.input.disabled = false;
+      refs.input.disabled = false; // інпут знову активний
       return;
     }
+
     updateTimerFace(convertMs(diff));
   }, 1000);
 });
@@ -77,7 +78,3 @@ function convertMs(ms) {
 
   return { days, hours, minutes, seconds };
 }
-
-console.log(convertMs(2000));
-console.log(convertMs(140000));
-console.log(convertMs(24140000));
